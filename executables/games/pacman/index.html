@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Pac-Man</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta names="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="apple-touch-icon-precomposed" href="https://masonicgit.github.io/pacman/icon/ios_icon.png">
+
+    <link rel="icon" type="image/png" href="https://masonicgit.github.io/pacman/icon/favicon.png">
+
+    <style>
+        body {
+            margin:0;
+            background: #000;
+        }
+        @font-face {
+            font-family: 'ArcadeR';
+            src: url('font/ARCADE_R.TTF');
+            /*
+            src: url('font/PressStart2P.ttf');
+            */
+        }
+        #canvas-warning {
+            color: #FF0;
+            font-size: 1.5em;
+        }
+    </style>
+
+<script src="./index_files/pacman.js"></script>
+
+</head>
+
+<body style="margin-left: 403.;">
+
+    <p style="color:white;">Click <a href="../index.html">here</a> to go back.</p>
+
+    <div style="font-family: ArcadeR"> </div>
+    <canvas id="canvas" width="473" height="578"><div id="canvas-warning">Your browser does not support HTML Canvas.  Please upgrade!</div></canvas>
+    <canvas id="atlas" style="display:none" width="502" height="790"></canvas>
+
+
+
+
+</body></html>

@@ -1,0 +1,218 @@
+<html><head>
+    <meta charset="UTF-8">
+    <style type="text/css">
+    :root {
+      font-family: sans-serif;
+    }
+    img {
+      border: 0;
+    }
+    th {
+      text-align: start;
+      white-space: nowrap;
+    }
+    th > a {
+      color: inherit;
+    }
+    table[order] > thead > tr > th {
+      cursor: pointer;
+    }
+    table[order] > thead > tr > th::after {
+      display: none;
+      width: .8em;
+      margin-inline-end: -.8em;
+      text-align: end;
+    }
+    table[order="asc"] > thead > tr > th::after {
+      content: "\2193"; /* DOWNWARDS ARROW (U+2193) */
+    }
+    table[order="desc"] > thead > tr > th::after {
+      content: "\2191"; /* UPWARDS ARROW (U+2191) */
+    }
+    table[order][order-by="0"] > thead > tr > th:first-child > a ,
+    table[order][order-by="1"] > thead > tr > th:first-child + th > a ,
+    table[order][order-by="2"] > thead > tr > th:first-child + th + th > a {
+      text-decoration: underline;
+    }
+    table[order][order-by="0"] > thead > tr > th:first-child::after ,
+    table[order][order-by="1"] > thead > tr > th:first-child + th::after ,
+    table[order][order-by="2"] > thead > tr > th:first-child + th + th::after {
+      display: inline-block;
+    }
+    table.remove-hidden > tbody > tr.hidden-object {
+      display: none;
+    }
+    td {
+      white-space: nowrap;
+    }
+    table.ellipsis {
+      width: 100%;
+      table-layout: fixed;
+      border-spacing: 0;
+    }
+    table.ellipsis > tbody > tr > td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    /* name */
+    /* name */
+    th:first-child {
+      padding-inline-end: 2em;
+    }
+    /* size */
+    th:first-child + th {
+      padding-inline-end: 1em;
+    }
+    td:first-child + td {
+      text-align: end;
+      padding-inline-end: 1em;
+    }
+    /* date */
+    td:first-child + td + td {
+      padding-inline-start: 1em;
+      padding-inline-end: .5em;
+    }
+    /* time */
+    td:first-child + td + td + td {
+      padding-inline-start: .5em;
+    }
+    .symlink {
+      font-style: italic;
+    }
+    .dir ,
+    .symlink ,
+    .file {
+      margin-inline-start: 20px;
+    }
+    .dir::before ,
+    .file > img {
+      margin-inline-end: 4px;
+      margin-inline-start: -20px;
+      max-width: 16px;
+      max-height: 16px;
+      vertical-align: middle;
+    }
+    .dir::before {
+      content: url(resource://content-accessible/html/folder.png);
+    }
+    </style>
+    <link rel="stylesheet" media="screen, projection" type="text/css" href="chrome://global/skin/dirListing/dirListing.css">
+    <script type="application/javascript">
+    'use strict';
+    var gTable, gOrderBy, gTBody, gRows, gUI_showHidden;
+    document.addEventListener("DOMContentLoaded", function() {
+      gTable = document.getElementsByTagName("table")[0];
+      gTBody = gTable.tBodies[0];
+      if (gTBody.rows.length < 2)
+        return;
+      gUI_showHidden = document.getElementById("UI_showHidden");
+      var headCells = gTable.tHead.rows[0].cells,
+          hiddenObjects = false;
+      function rowAction(i) {
+        return function(event) {
+          event.preventDefault();
+          orderBy(i);
+        }
+      }
+      for (var i = headCells.length - 1; i >= 0; i--) {
+        var anchor = document.createElement("a");
+        anchor.href = "";
+        anchor.appendChild(headCells[i].firstChild);
+        headCells[i].appendChild(anchor);
+        headCells[i].addEventListener("click", rowAction(i), true);
+      }
+      if (gUI_showHidden) {
+        gRows = Array.from(gTBody.rows);
+        hiddenObjects = gRows.some(row => row.className == "hidden-object");
+      }
+      gTable.setAttribute("order", "");
+      if (hiddenObjects) {
+        gUI_showHidden.style.display = "block";
+        updateHidden();
+      }
+    }, "false");
+    function compareRows(rowA, rowB) {
+      var a = rowA.cells[gOrderBy].getAttribute("sortable-data") || "";
+      var b = rowB.cells[gOrderBy].getAttribute("sortable-data") || "";
+      var intA = +a;
+      var intB = +b;
+      if (a == intA && b == intB) {
+        a = intA;
+        b = intB;
+      } else {
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+      }
+      if (a < b)
+        return -1;
+      if (a > b)
+        return 1;
+      return 0;
+    }
+    function orderBy(column) {
+      if (!gRows)
+        gRows = Array.from(gTBody.rows);
+      var order;
+      if (gOrderBy == column) {
+        order = gTable.getAttribute("order") == "asc" ? "desc" : "asc";
+      } else {
+        order = "asc";
+        gOrderBy = column;
+        gTable.setAttribute("order-by", column);
+        gRows.sort(compareRows);
+      }
+      gTable.removeChild(gTBody);
+      gTable.setAttribute("order", order);
+      if (order == "asc")
+        for (var i = 0; i < gRows.length; i++)
+          gTBody.appendChild(gRows[i]);
+      else
+        for (var i = gRows.length - 1; i >= 0; i--)
+          gTBody.appendChild(gRows[i]);
+      gTable.appendChild(gTBody);
+    }
+    function updateHidden() {
+      gTable.className = gUI_showHidden.getElementsByTagName("input")[0].checked ?
+                         "" :
+                         "remove-hidden";
+    }
+    </script>
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8%2F9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAjFJREFUeNqsU8uOElEQPffR3XQ3ONASdBJCSBxHos5%2B3Bg3rvkCv8PElS78gPkO%2FATjQoUdO2ftrJiRh6aneTb9sOpC4weMN6lcuFV16pxDIfI8x12OYIDhcPiu2Wx%2B%2FHF5CW1Z6Jyegt%2FTNEWSJIjjGFEUIQxDrFYrWFSzXC4%2FdLvd95pRKpXKy%2BpRFZ7nwaWo1%2BsGnQG2260BKJfLKJVKGI1GEEJw7ateryd0v993W63WEwjgxfn5obGYzgCbzcaEbdsIggDj8Riu6z6iUk9SYZMSx8W0LMsM%2FSKK75xnJlIq80anQXdbEp0OhcPJ0eiaJnGRMEyyPDsAKKUM9clkYoDo3SZJzzSdp0VSKYmfV1co%2Bz580kw5KDIM8RbRfEnUf1HzxtQyMAGcaGruTKczMzEIaqhKifV6jd%2BzGQQB5llunF%2FM52BizC2K5sYPYvZcu653tjOM9O93wnYc08gmkgg4VAxixfqFUJT36AYBZGd6PJkFCZnnlBxMp38gqIgLpZB0y4Nph18lyWh5FFbrOSxbl3V4G%2BVB7T4ajYYxTyuLtO%2BCvWGgJE1Mc7JNsJEhvgw%2FQV4fo%2F24nbEsX2u1d5sVyn8sJO0ZAQiIYnFh%2BxrfLz%2Fj29cBS%2FO14zg3i8XigW3ZkErDtmKoeM%2BAJGRMnXeEPGKf0nCD1ydvkDzU9Jbc6OpR7WIw6L8lQ%2B4pQ1%2FlPF0RGM9Ns91Wmptk0GfB4EJkt77vXYj%2F8m%2B8y%2FkrwABHbz2H9V68DQAAAABJRU5ErkJggg%3D%3D">
+    <title>ƒStream</title>
+    </head>
+    <body dir="ltr">
+    <h1>ƒStream</h1>
+    <p id="UI_goUp"><a class="up" href="https://logandoescode.github.io/">Back to LoganDoesCode Home</a></p>
+    <table order="">
+     <thead>
+      <tr>
+       <th><a>One Day at a Time</a></th>
+       <th><a>Episode</a></th>
+       <th><a></a></th>
+       <th><a>Season 4</a></th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td sortable-data="2index.html"><table class="ellipsis"><tbody><tr><td><a class="file" href="https://rr2---sn-aigl6nzk.c.drive.google.com/videoplayback?expire=1681605260&ei=TAo7ZPPGIY6Cpb0PgoOZ2A4&ip=95.145.3.96&cp=QVRNU0dfVFJUQVhPOkEyYlpOVHdhMUFXVDhIZzJLSEVwZUhfckNOU0JPUGhvdFhJQ1p5dHh3QnM&id=6f97d7fe206e4c35&itag=22&source=webdrive&requiressl=yes&mh=L0&mm=32&mn=sn-aigl6nzk&ms=su&mv=u&mvi=2&pl=25&ttl=transient&susc=dr&driveid=18Y6pDqYDUCd5-D5qrK28o1J7cBvSaZU1&app=explorer&mime=video/mp4&vprv=1&prv=1&dur=1287.012&lmt=1656299185771498&mt=1681590425&subapp=DRIVE_WEB_FILE_VIEWER&txp=0011224&sparams=expire,ei,ip,cp,id,itag,source,requiressl,ttl,susc,driveid,app,mime,vprv,prv,dur,lmt&sig=AOq0QJ8wRQIgZy5b7QPVdgCWNuD-ZQz8_z-FVOMj8yQKNpvWBpdpkRACIQCw-lUrNKdQ_bZhP1k6YwYcswgTREBY87HlL873VaEefQ==&lsparams=mh,mm,mn,ms,mv,mvi,pl&lsig=AG3C_xAwRQIhAMrH6waBMDi_gbMX-YLZpqGgq6RG0XcwPAPx9nXF6H-9AiBNj4_nTGCmL4eKXHtQytUbnQBPHDl9IpZEgG0AwMtKfA==&cpn=g2Ek40fhrdgN7Xe_&c=WEB_EMBEDDED_PLAYER&cver=1.20230411.01.00"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fsecure.webtoolhub.com%2Fstatic%2Fresources%2Ficons%2Fset165%2Fbf243c3a.png&f=1&nofb=1&ipt=12bb697971a5607b375da1ec29a0b496bceef17ff906e0c84831bff5a29e723e&ipo=images?size=16" alt="File:">Checking Boxes</a></td></tr></tbody></table></td>
+       <td>1</td>
+       <tr>
+        <td sortable-data="2index.html"><table class="ellipsis"><tbody><tr><td><a class="file" href="https://rr3---sn-aigzrnsz.c.drive.google.com/videoplayback?expire=1681605355&ei=qwo7ZJPxILGGwtQP3K6MsAc&ip=95.145.3.96&cp=QVRNU0dfVFNTRlhPOkEyYlpPU2JhMUFXVDhIaDFQSEVwZUhfckRNWEJPUGhvdFhKQkV5dHh3QnM&id=6a53497f310b9e96&itag=22&source=webdrive&requiressl=yes&mh=WR&mm=32&mn=sn-aigzrnsz&ms=su&mv=u&mvi=3&pl=25&ttl=transient&susc=dr&driveid=18hOlmLzQlaxlyn3s12B-0n3gZojKWiET&app=explorer&mime=video/mp4&vprv=1&prv=1&dur=1277.051&lmt=1656300991291717&mt=1681590425&subapp=DRIVE_WEB_FILE_VIEWER&txp=0011224&sparams=expire,ei,ip,cp,id,itag,source,requiressl,ttl,susc,driveid,app,mime,vprv,prv,dur,lmt&sig=AOq0QJ8wRQIgc3akp1t5kTNT4T5difctDsZ6uNTjJSFy07YRFqp4IogCIQDk8vntA-wg6s18MWIpvX3MaP-8R81H8odV_kHz9cedig==&lsparams=mh,mm,mn,ms,mv,mvi,pl&lsig=AG3C_xAwRQIhAL1W-DlwCj5c8cLIqmqD_szq3esQytQwFe0rFbe3q7SXAiAR_1-u4l7n7vx-o7fj_isbsZCy-i8erP70Ho5yvfSJig==&cpn=K33wK2E7JIaKuGai&c=WEB_EMBEDDED_PLAYER&cver=1.20230411.01.00"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fsecure.webtoolhub.com%2Fstatic%2Fresources%2Ficons%2Fset165%2Fbf243c3a.png&f=1&nofb=1&ipt=12bb697971a5607b375da1ec29a0b496bceef17ff906e0c84831bff5a29e723e&ipo=images?size=16" alt="File:">Penny Pinching</a></td></tr></tbody></table></td>
+        <td>2</td>
+        <tr>
+         <td sortable-data="2index.html"><table class="ellipsis"><tbody><tr><td><a class="file" href="https://rr2---sn-aigl6nsd.c.drive.google.com/videoplayback?expire=1681605435&ei=-wo7ZJWNF5Xu1bYPl5aUoA4&ip=95.145.3.96&cp=QVRNU0dfVFRRRlhPOkEyYlpQUWJhMUFXVDhIaTlQSEVwZUhfckVLWEJPUGhvdFhLWkV5dHh3QnM&id=b958c8b0ede2d47a&itag=22&source=webdrive&requiressl=yes&mh=ld&mm=32&mn=sn-aigl6nsd&ms=su&mv=u&mvi=2&pl=25&ttl=transient&susc=dr&driveid=18mySHhRkO7ydc2PJKwR1XTgskggFymv1&app=explorer&mime=video/mp4&vprv=1&prv=1&dur=1277.051&lmt=1656299820035280&mt=1681590425&subapp=DRIVE_WEB_FILE_VIEWER&txp=0011224&sparams=expire,ei,ip,cp,id,itag,source,requiressl,ttl,susc,driveid,app,mime,vprv,prv,dur,lmt&sig=AOq0QJ8wRgIhANMo2rJ6bLbfafzbr2mNk658vn7dBaI-hIJtl0V1bIquAiEAg46eUk5xqyXP81se7c4E2YZ-AiizhqHV9Vip3goQAVE=&lsparams=mh,mm,mn,ms,mv,mvi,pl&lsig=AG3C_xAwRgIhAIJ4i3IKCqN-rFep5xYrxv2akdgWThxjIugf9P6PM64_AiEArmSi9KpWXN-jxbOSBJGeq_AsJ6pxRH9hA_5828AHDLw=&cpn=LtOb3O0_fO1QtKnd&c=WEB_EMBEDDED_PLAYER&cver=1.20230411.01.00"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fsecure.webtoolhub.com%2Fstatic%2Fresources%2Ficons%2Fset165%2Fbf243c3a.png&f=1&nofb=1&ipt=12bb697971a5607b375da1ec29a0b496bceef17ff906e0c84831bff5a29e723e&ipo=images?size=16" alt="File:">Boundaries</a></td></tr></tbody></table></td>
+         <td>3</td>
+         <tr>
+          <td sortable-data="2index.html"><table class="ellipsis"><tbody><tr><td><a class="file" href="https://rr5---sn-aigzrnld.c.drive.google.com/videoplayback?expire=1681605509&ei=RQs7ZL_kIJWlpb0P7pO8qAc&ip=95.145.3.96&cp=QVRNU0dfVFVOSlhPOkEyYlpRTmZhMUFXVDhIajZUSEVwZUhfckZIQkJPUGhvdFhMV0l5dHh3QnM&id=e0c99bc7ffce051c&itag=18&source=webdrive&requiressl=yes&mh=ka&mm=32&mn=sn-aigzrnld&ms=su&mv=u&mvi=5&pl=25&ttl=transient&susc=dr&driveid=18pDd1UuSPVtR-LMMFvJFZ5pGqG8UQB5u&app=explorer&mime=video/mp4&vprv=1&prv=1&dur=1243.800&lmt=1656298465695368&mt=1681590425&subapp=DRIVE_WEB_FILE_VIEWER&txp=0011224&sparams=expire,ei,ip,cp,id,itag,source,requiressl,ttl,susc,driveid,app,mime,vprv,prv,dur,lmt&sig=AOq0QJ8wRQIhAIrCW44wg0yw5ErnXRresWbRWyQb7bvBK1-EVB-RfdILAiBbCHDjaXe64nlOtZptEc09_P3M3SN1rBCrRAtwvlPT6g==&lsparams=mh,mm,mn,ms,mv,mvi,pl&lsig=AG3C_xAwRQIgdfYpbCIf4jHg8CqD4dVdrog9YkDBld-Pvce8aP-mwgMCIQCOcNMSQssI7qcxBJwOPejRljZDGZP1aDugZ-737z2Amg==&cpn=EeJNTR_BNEK81ieW&c=WEB_EMBEDDED_PLAYER&cver=1.20230411.01.00"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fsecure.webtoolhub.com%2Fstatic%2Fresources%2Ficons%2Fset165%2Fbf243c3a.png&f=1&nofb=1&ipt=12bb697971a5607b375da1ec29a0b496bceef17ff906e0c84831bff5a29e723e&ipo=images?size=16" alt="File:">One Halloween at a Time</a></td></tr></tbody></table></td>
+          <td>4</td>
+          <tr>
+           <td sortable-data="2index.html"><table class="ellipsis"><tbody><tr><td><a class="file" href="https://rr4---sn-aigzrnss.c.drive.google.com/videoplayback?expire=1681605542&ei=Zgs7ZK64M4yHwtQPjYSj2AI&ip=95.145.3.96&cp=QVRNU0dfVFVSQ1hPOkEyYlpRUnlhMUFXVDhIajBNSEVwZUhfckZMVUJPUGhvdFhMQUJ5dHh3QnM&id=39e18c5bbbd761fa&itag=18&source=webdrive&requiressl=yes&mh=jl&mm=32&mn=sn-aigzrnss&ms=su&mv=u&mvi=4&pl=25&ttl=transient&susc=dr&driveid=18pjL_mZ2uwJljHvDzfbmbBXCvXF6M2h1&app=explorer&mime=video/mp4&vprv=1&prv=1&dur=1243.521&lmt=1656303810663156&mt=1681590425&subapp=DRIVE_WEB_FILE_VIEWER&txp=0011224&sparams=expire,ei,ip,cp,id,itag,source,requiressl,ttl,susc,driveid,app,mime,vprv,prv,dur,lmt&sig=AOq0QJ8wRgIhAMtIFFnlscyWEQuT4ZwvVMLxt0Ypo_8KyJ2hnPlsjPTfAiEAv7KXn5JhVF2SoTltHygHrLgWhyjRyn78A8qFmbH3Law=&lsparams=mh,mm,mn,ms,mv,mvi,pl&lsig=AG3C_xAwRgIhAMMrLSM7KHkCdPTpdgFaYmy52tkPb5IqqtHBpipxHrQ2AiEA6EJ4Hjg2v8c8s1ff9Z9xCV9yiYdt3XhE2N4PdqzWdNs=&cpn=_yE3iVgVHBSJDJal&c=WEB_EMBEDDED_PLAYER&cver=1.20230411.01.00"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fsecure.webtoolhub.com%2Fstatic%2Fresources%2Ficons%2Fset165%2Fbf243c3a.png&f=1&nofb=1&ipt=12bb697971a5607b375da1ec29a0b496bceef17ff906e0c84831bff5a29e723e&ipo=images?size=16" alt="File:">Perfect</a></td></tr></tbody></table></td>
+           <td>5</td>
+           <tr>
+            <td sortable-data="2index.html"><table class="ellipsis"><tbody><tr><td><a class="file" href="https://rr4---sn-aigzrn7d.c.drive.google.com/videoplayback?expire=1681605562&ei=egs7ZL-AC9qX1dUPuMyOyAg&ip=95.145.3.96&cp=QVRNU0dfVFVUQ1hPOkEyYlpRVHlhMUFXVDhIajJNSEVwZUhfckZOVUJPUGhvdFhMQ0J5dHh3QnM&id=5ccfa5d351971505&itag=22&source=webdrive&requiressl=yes&mh=sc&mm=32&mn=sn-aigzrn7d&ms=su&mv=u&mvi=4&pl=25&ttl=transient&susc=dr&driveid=18z8OQr_C_KkZBVkmuEgYIUsGCAAmK66q&app=explorer&mime=video/mp4&vprv=1&prv=1&dur=1243.892&lmt=1656298804255204&mt=1681590425&subapp=DRIVE_WEB_FILE_VIEWER&txp=0011224&sparams=expire,ei,ip,cp,id,itag,source,requiressl,ttl,susc,driveid,app,mime,vprv,prv,dur,lmt&sig=AOq0QJ8wRAIgOzbKUOK5t7YMI-Pmy4go0KAgQEMqGuxNudEqlP_hUvUCID125AoqdSjjYyBH9kDwyCNO6iFgE4RQpT3sET_S5Op8&lsparams=mh,mm,mn,ms,mv,mvi,pl&lsig=AG3C_xAwRAIgUwcjG2V3TVUkZ3YKjzUhUx6VM_A7eR6e0BFHKA4W1LYCIAOOs2wyE2BDwPzsgYZG53vxAUcK3iiOC7NLIDxe0spK&cpn=nZTMGqWkFcokMxTL&c=WEB_EMBEDDED_PLAYER&cver=1.20230411.01.00"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fsecure.webtoolhub.com%2Fstatic%2Fresources%2Ficons%2Fset165%2Fbf243c3a.png&f=1&nofb=1&ipt=12bb697971a5607b375da1ec29a0b496bceef17ff906e0c84831bff5a29e723e&ipo=images?size=16" alt="File:">Supermoon</a></td></tr></tbody></table></td>
+            <td>6</td>
+            <tr>
+             <td sortable-data="2index.html"><table class="ellipsis"><tbody><tr><td><a class="file" href="https://rr2---sn-aigl6n6s.c.drive.google.com/videoplayback?expire=1681605623&ei=tws7ZMLxIrjypb0PzpeAiA0&ip=95.145.3.96&cp=QVRNU0dfVFZQRFhPOkEyYlpSUHphMUFXVDhIazhOSEVwZUhfckdKVkJPUGhvdFhNWUN5dHh3QnM&id=f76925d5c14711b4&itag=18&source=webdrive&requiressl=yes&mh=wo&mm=32&mn=sn-aigl6n6s&ms=su&mv=u&mvi=2&pl=25&ttl=transient&susc=dr&driveid=19FPypFUe__TFw4F7ZDQG2Xh6Z7DymnwJ&app=explorer&mime=video/mp4&vprv=1&prv=1&dur=1247.422&lmt=1656298657351375&mt=1681590425&subapp=DRIVE_WEB_FILE_VIEWER&txp=0011224&sparams=expire,ei,ip,cp,id,itag,source,requiressl,ttl,susc,driveid,app,mime,vprv,prv,dur,lmt&sig=AOq0QJ8wRgIhAJ_VaXHOK3EQTceHAvfFlW24wFR2BCP9lmud0i_BRDI4AiEAoydrFNYbZ34-8QKqdKXnA059onlN3_DRZaGF4OVAQew=&lsparams=mh,mm,mn,ms,mv,mvi,pl&lsig=AG3C_xAwRgIhAPukovbD3LP21ZqkxLO5R2pRXxEHBQJEJD4GcS_hTew0AiEAlJlvTt99M-UUQMTn8YDJaVIZJ4CkoakClQ2DKxScOYQ=&cpn=OtdF3hRWTwc5dnr-&c=WEB_EMBEDDED_PLAYER&cver=1.20230411.01.00"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fsecure.webtoolhub.com%2Fstatic%2Fresources%2Ficons%2Fset165%2Fbf243c3a.png&f=1&nofb=1&ipt=12bb697971a5607b375da1ec29a0b496bceef17ff906e0c84831bff5a29e723e&ipo=images?size=16" alt="File:">The Politics Episode</a></td></tr></tbody></table></td>
+             <td>7</td>
+    </tr></tbody></table>
+    </body></html>

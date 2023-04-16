@@ -1,198 +1,208 @@
-<html><head>
-    <meta charset="UTF-8">
-    <style type="text/css">
-    :root {
-      font-family: sans-serif;
-    }
-    img {
-      border: 0;
-    }
-    th {
-      text-align: start;
-      white-space: nowrap;
-    }
-    th > a {
-      color: inherit;
-    }
-    table[order] > thead > tr > th {
-      cursor: pointer;
-    }
-    table[order] > thead > tr > th::after {
-      display: none;
-      width: .8em;
-      margin-inline-end: -.8em;
-      text-align: end;
-    }
-    table[order="asc"] > thead > tr > th::after {
-      content: "\2193"; /* DOWNWARDS ARROW (U+2193) */
-    }
-    table[order="desc"] > thead > tr > th::after {
-      content: "\2191"; /* UPWARDS ARROW (U+2191) */
-    }
-    table[order][order-by="0"] > thead > tr > th:first-child > a ,
-    table[order][order-by="1"] > thead > tr > th:first-child + th > a ,
-    table[order][order-by="2"] > thead > tr > th:first-child + th + th > a {
-      text-decoration: underline;
-    }
-    table[order][order-by="0"] > thead > tr > th:first-child::after ,
-    table[order][order-by="1"] > thead > tr > th:first-child + th::after ,
-    table[order][order-by="2"] > thead > tr > th:first-child + th + th::after {
-      display: inline-block;
-    }
-    table.remove-hidden > tbody > tr.hidden-object {
-      display: none;
-    }
-    td {
-      white-space: nowrap;
-    }
-    table.ellipsis {
-      width: 100%;
-      table-layout: fixed;
-      border-spacing: 0;
-    }
-    table.ellipsis > tbody > tr > td {
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    /* name */
-    /* name */
-    th:first-child {
-      padding-inline-end: 2em;
-    }
-    /* size */
-    th:first-child + th {
-      padding-inline-end: 1em;
-    }
-    td:first-child + td {
-      text-align: end;
-      padding-inline-end: 1em;
-    }
-    /* date */
-    td:first-child + td + td {
-      padding-inline-start: 1em;
-      padding-inline-end: .5em;
-    }
-    /* time */
-    td:first-child + td + td + td {
-      padding-inline-start: .5em;
-    }
-    .symlink {
-      font-style: italic;
-    }
-    .dir ,
-    .symlink ,
-    .file {
-      margin-inline-start: 20px;
-    }
-    .dir::before ,
-    .file > img {
-      margin-inline-end: 4px;
-      margin-inline-start: -20px;
-      max-width: 16px;
-      max-height: 16px;
-      vertical-align: middle;
-    }
-    .dir::before {
-      content: url(resource://content-accessible/html/folder.png);
-    }
-    </style>
-    <link rel="stylesheet" media="screen, projection" type="text/css" href="chrome://global/skin/dirListing/dirListing.css">
-    <script type="application/javascript">
-    'use strict';
-    var gTable, gOrderBy, gTBody, gRows, gUI_showHidden;
-    document.addEventListener("DOMContentLoaded", function() {
-      gTable = document.getElementsByTagName("table")[0];
-      gTBody = gTable.tBodies[0];
-      if (gTBody.rows.length < 2)
-        return;
-      gUI_showHidden = document.getElementById("UI_showHidden");
-      var headCells = gTable.tHead.rows[0].cells,
-          hiddenObjects = false;
-      function rowAction(i) {
-        return function(event) {
-          event.preventDefault();
-          orderBy(i);
-        }
-      }
-      for (var i = headCells.length - 1; i >= 0; i--) {
-        var anchor = document.createElement("a");
-        anchor.href = "";
-        anchor.appendChild(headCells[i].firstChild);
-        headCells[i].appendChild(anchor);
-        headCells[i].addEventListener("click", rowAction(i), true);
-      }
-      if (gUI_showHidden) {
-        gRows = Array.from(gTBody.rows);
-        hiddenObjects = gRows.some(row => row.className == "hidden-object");
-      }
-      gTable.setAttribute("order", "");
-      if (hiddenObjects) {
-        gUI_showHidden.style.display = "block";
-        updateHidden();
-      }
-    }, "false");
-    function compareRows(rowA, rowB) {
-      var a = rowA.cells[gOrderBy].getAttribute("sortable-data") || "";
-      var b = rowB.cells[gOrderBy].getAttribute("sortable-data") || "";
-      var intA = +a;
-      var intB = +b;
-      if (a == intA && b == intB) {
-        a = intA;
-        b = intB;
-      } else {
-        a = a.toLowerCase();
-        b = b.toLowerCase();
-      }
-      if (a < b)
-        return -1;
-      if (a > b)
-        return 1;
-      return 0;
-    }
-    function orderBy(column) {
-      if (!gRows)
-        gRows = Array.from(gTBody.rows);
-      var order;
-      if (gOrderBy == column) {
-        order = gTable.getAttribute("order") == "asc" ? "desc" : "asc";
-      } else {
-        order = "asc";
-        gOrderBy = column;
-        gTable.setAttribute("order-by", column);
-        gRows.sort(compareRows);
-      }
-      gTable.removeChild(gTBody);
-      gTable.setAttribute("order", order);
-      if (order == "asc")
-        for (var i = 0; i < gRows.length; i++)
-          gTBody.appendChild(gRows[i]);
-      else
-        for (var i = gRows.length - 1; i >= 0; i--)
-          gTBody.appendChild(gRows[i]);
-      gTable.appendChild(gTBody);
-    }
-    function updateHidden() {
-      gTable.className = gUI_showHidden.getElementsByTagName("input")[0].checked ?
-                         "" :
-                         "remove-hidden";
-    }
-    </script>
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8%2F9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAjFJREFUeNqsU8uOElEQPffR3XQ3ONASdBJCSBxHos5%2B3Bg3rvkCv8PElS78gPkO%2FATjQoUdO2ftrJiRh6aneTb9sOpC4weMN6lcuFV16pxDIfI8x12OYIDhcPiu2Wx%2B%2FHF5CW1Z6Jyegt%2FTNEWSJIjjGFEUIQxDrFYrWFSzXC4%2FdLvd95pRKpXKy%2BpRFZ7nwaWo1%2BsGnQG2260BKJfLKJVKGI1GEEJw7ateryd0v993W63WEwjgxfn5obGYzgCbzcaEbdsIggDj8Riu6z6iUk9SYZMSx8W0LMsM%2FSKK75xnJlIq80anQXdbEp0OhcPJ0eiaJnGRMEyyPDsAKKUM9clkYoDo3SZJzzSdp0VSKYmfV1co%2Bz580kw5KDIM8RbRfEnUf1HzxtQyMAGcaGruTKczMzEIaqhKifV6jd%2BzGQQB5llunF%2FM52BizC2K5sYPYvZcu653tjOM9O93wnYc08gmkgg4VAxixfqFUJT36AYBZGd6PJkFCZnnlBxMp38gqIgLpZB0y4Nph18lyWh5FFbrOSxbl3V4G%2BVB7T4ajYYxTyuLtO%2BCvWGgJE1Mc7JNsJEhvgw%2FQV4fo%2F24nbEsX2u1d5sVyn8sJO0ZAQiIYnFh%2BxrfLz%2Fj29cBS%2FO14zg3i8XigW3ZkErDtmKoeM%2BAJGRMnXeEPGKf0nCD1ydvkDzU9Jbc6OpR7WIw6L8lQ%2B4pQ1%2FlPF0RGM9Ns91Wmptk0GfB4EJkt77vXYj%2F8m%2B8y%2FkrwABHbz2H9V68DQAAAABJRU5ErkJggg%3D%3D">
-    <title>ƒStream</title>
-    </head>
-    <body dir="ltr">
-    <h1>ƒStream</h1>
-    <p id="UI_goUp"><a class="up" href="https://logandoescode.github.io/">Back to LoganDoesCode Home</a></p>
-    <table order="">
-     <thead>
-      <tr>
-       <th><a>One Day at a Time</a></th>
-       <th><a>Year</a></th>
-      </tr>
-     </thead>
-     <tbody>
-    <tr>
-     <td sortable-data="2index.html"><table class="ellipsis"><tbody><tr><td><a class="file" href="s4/"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fsecure.webtoolhub.com%2Fstatic%2Fresources%2Ficons%2Fset165%2Fbf243c3a.png&f=1&nofb=1&ipt=12bb697971a5607b375da1ec29a0b496bceef17ff906e0c84831bff5a29e723e&ipo=images?size=16" alt="File:">Season 4</a></td></tr></tbody></table></td>
-     <td>2020</td>
-    </tr></tbody></table>
-    </body></html>
+<!DOCTYPE html>
+<!--
+    ⢀⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⣠⣤⣶⣶
+    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⢰⣿⣿⣿⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⣀⣀⣾⣿⣿⣿⣿
+    ⣿⣿⣿⣿⣿⡏⠉⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿
+    ⣿⣿⣿⣿⣿⣿⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠉⠁⠀⣿
+    ⣿⣿⣿⣿⣿⣿⣧⡀⠀⠀⠀⠀⠙⠿⠿⠿⠻⠿⠿⠟⠿⠛⠉⠀⠀⠀⠀⠀⣸⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣷⣄⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⣴⣿⣿⣿⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀⠀⢰⣹⡆⠀⠀⠀⠀⠀⠀⣭⣷⠀⠀⠀⠸⣿⣿⣿⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠈⠉⠀⠀⠤⠄⠀⠀⠀⠉⠁⠀⠀⠀⠀⢿⣿⣿⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣿⢾⣿⣷⠀⠀⠀⠀⡠⠤⢄⠀⠀⠀⠠⣿⣿⣷⠀⢸⣿⣿⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣿⡀⠉⠀⠀⠀⠀⠀⢄⠀⢀⠀⠀⠀⠀⠉⠉⠁⠀⠀⣿⣿⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿
+
+  pikachu! stop reading my code ;w;
+
+-->
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>fStream</title>
+<link rel="icon" type="image/x-icon" href="https://win98icons.alexmeub.com/icons/png/media_player-1.png">
+<script type="text/javascript" async="" src="files/ga.js"></script><script type="text/javascript" src="files/jquery.js"></script>
+<style type="text/css">
+	body {
+		background-color: #1b3000
+	}
+	#console {
+		font-family: courier, monospace;
+		color: #fff;
+		width:750px;
+		margin-left:auto;
+		margin-right:auto;
+		margin-top:100px;
+		font-size:14px;
+	}
+	a {
+		color: #0bc;
+		text-decoration: none;
+	}
+	#a {
+		color: #fff;
+	}
+	#c {
+		color: #0bc;
+	}
+	#b {
+		color: #ff98d4;
+	}
+
+	.fileicon {
+	height: 16px;
+	width: 16px;
+	margin-bottom: -5px;
+}
+
+</style>
+</head>
+<body>
+<script type="text/javascript">
+	var Typer={
+	text: null,
+	accessCountimer:null,
+	index:0, // current cursor position
+	speed:2, // speed of the Typer
+	file:"", //file, must be setted
+	accessCount:0, //times alt is pressed for Access Granted
+	deniedCount:0, //times caps is pressed for Access Denied
+	init: function(){// inizialize Hacker Typer
+		accessCountimer=setInterval(function(){Typer.updLstChr();},500); // inizialize timer for blinking cursor
+		$.get(Typer.file,function(data){// get the text file
+			Typer.text=data;// save the textfile in Typer.text
+			Typer.text = Typer.text.slice(0, Typer.text.length-1);
+		});
+	},
+
+	content:function(){
+		return $("#console").html();// get console content
+	},
+
+	write:function(str){// append to console content
+		$("#console").append(str);
+		return false;
+	},
+
+	makeAccess:function(){//create Access Granted popUp      FIXME: popup is on top of the page and doesn't show is the page is scrolled
+		Typer.hidepop(); // hide all popups
+		Typer.accessCount=0; //reset count
+		var ddiv=$("<div id='gran'>").html(""); // create new blank div and id "gran"
+		ddiv.addClass("accessGranted"); // add class to the div
+		ddiv.html("<h1>ACCESS GRANTED</h1>"); // set content of div
+		$(document.body).prepend(ddiv); // prepend div to body
+		return false;
+	},
+	makeDenied:function(){//create Access Denied popUp      FIXME: popup is on top of the page and doesn't show is the page is scrolled
+		Typer.hidepop(); // hide all popups
+		Typer.deniedCount=0; //reset count
+		var ddiv=$("<div id='deni'>").html(""); // create new blank div and id "deni"
+		ddiv.addClass("accessDenied");// add class to the div
+		ddiv.html("<h1>ACCESS DENIED</h1>");// set content of div
+		$(document.body).prepend(ddiv);// prepend div to body
+		return false;
+	},
+
+	hidepop:function(){// remove all existing popups
+		$("#deni").remove();
+		$("#gran").remove();
+	},
+
+	addText:function(key){//Main function to add the code
+		if(key.keyCode==18){// key 18 = alt key
+			Typer.accessCount++; //increase counter
+			if(Typer.accessCount>=3){// if it's presed 3 times
+				Typer.makeAccess(); // make access popup
+			}
+		}else if(key.keyCode==20){// key 20 = caps lock
+			Typer.deniedCount++; // increase counter
+			if(Typer.deniedCount>=3){ // if it's pressed 3 times
+				Typer.makeDenied(); // make denied popup
+			}
+		}else if(key.keyCode==27){ // key 27 = esc key
+			Typer.hidepop(); // hide all popups
+		}else if(Typer.text){ // otherway if text is loaded
+			var cont=Typer.content(); // get the console content
+			if(cont.substring(cont.length-1,cont.length)=="|") // if the last char is the blinking cursor
+				$("#console").html($("#console").html().substring(0,cont.length-1)); // remove it before adding the text
+			if(key.keyCode!=8){ // if key is not backspace
+				Typer.index+=Typer.speed;	// add to the index the speed
+			}else{
+				if(Typer.index>0) // else if index is not less than 0
+					Typer.index-=Typer.speed;//	remove speed for deleting text
+			}
+			var text=Typer.text.substring(0,Typer.index)// parse the text for stripping html enities
+			var rtn= new RegExp("\n", "g"); // newline regex
+
+			$("#console").html(text.replace(rtn,"<br/>"));// replace newline chars with br, tabs with 4 space and blanks with an html blank
+			window.scrollBy(0,50); // scroll to make sure bottom is always visible
+		}
+		if ( key.preventDefault && key.keyCode != 122 ) { // prevent F11(fullscreen) from being blocked
+			key.preventDefault()
+		};
+		if(key.keyCode != 122){ // otherway prevent keys default behavior
+			key.returnValue = false;
+		}
+	},
+
+	updLstChr:function(){ // blinking cursor
+		var cont=this.content(); // get console
+		if(cont.substring(cont.length-1,cont.length)=="|") // if last char is the cursor
+			$("#console").html($("#console").html().substring(0,cont.length-1)); // remove it
+		else
+			this.write("|"); // else write it
+	}
+}
+
+function replaceUrls(text) {
+	var http = text.indexOf("http://");
+	var space = text.indexOf(".me ", http);
+	if (space != -1) {
+		var url = text.slice(http, space-1);
+		return text.replace(url, "<a href=\""  + url + "\">" + url + "</a>");
+	} else {
+	return text
+}
+}
+Typer.speed=3;
+Typer.file="jeffweisbein.txt";
+Typer.init();
+
+var timer = setInterval("t();", 30);
+function t() {
+	Typer.addText({"keyCode": 123748});
+	if (Typer.index > Typer.text.length) {
+		clearInterval(timer);
+	}
+}
+
+</script>
+<div id="console">
+	<h1><span id="a"><img src="https://win98icons.alexmeub.com/icons/png/wm-2.png" width="32" height="32">	fStream</span></h1>
+	<sub id="b"class="fileicon">Dedicado a mi hermosa novia Lexi ~ Te amo, mi princesa</sub>
+	<br><br>
+	<sub><img src="https://win98icons.alexmeub.com/icons/png/homepage-1.png" class="fileicon"><a href="https://logandoescode.github.io/"> Back to Home</a></br></sub>
+	<br>
+	<h2><span id="a"><img src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fcdn.countryflags.com%2Fthumbs%2Fcuba%2Fflag-square-250.png&f=1&nofb=1&ipt=6692710c5c6b0bf979eb8a8562094fc5e8b1e46ead880937fa40373140f0f8c6&ipo=images" width="20" height="20"> One Day at a Time</span></h2>
+	<p><a href="s1/"><img src="https://win98icons.alexmeub.com/icons/png/media_player_file-1.png" class="fileicon"> Season 1</a></p>
+	<p><a href="s2/"><img src="https://win98icons.alexmeub.com/icons/png/media_player_file-1.png" class="fileicon"> Season 2</a></p>
+	<p><a href="s3/"><img src="https://win98icons.alexmeub.com/icons/png/media_player_file-1.png" class="fileicon"> Season 3</a></p>
+	<p><a href="s4/"><img src="https://win98icons.alexmeub.com/icons/png/media_player_file-1.png" class="fileicon"> Season 4</a></p>
+</div>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-610661-7']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+ </body></html>

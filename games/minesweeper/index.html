@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<title>minesweeper.exe</title>
+	</head>
+<style>
+	body {
+		display: flex;
+		height: 100vh;
+		flex-direction: row;
+		margin: 0;
+	}
+	.col-1 {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		background: #3B6EA5; /* 222, 235, 247 */
+		place-content: center;
+		align-items: center;
+		font-family: 'Segoe UI';
+		font-size: 9pt;
+	}
+	iframe {
+		border: 1px solid #777777;
+	}
+	uwu {
+		color: rgb(255, 255, 255);
+		text-decoration: none;
+	}
+</style>
+<script>
+	/* iframe src may be cached on parent page reload to wherever iframe game url state was, so reset it */
+	document.addEventListener('DOMContentLoaded', function() {
+		/* iframe src could have changed from user so hard reset it on page load */
+		iframe_elem = document.getElementsByTagName('iframe')[0];
+		iframe_elem.src = "winmine.html";
+		/* delay long enough for access to iframe winmine object */
+		setTimeout(() => {
+			/* trigger iframe resizing when beginner mode is changed and when x/y px is changed */
+			const iframe_doc = document.getElementsByTagName('iframe')[0].contentWindow;
+			const width = iframe_doc.winmine.width;
+			const height = iframe_doc.winmine.height;
+			const y_px = iframe_doc.winmine.setting.y_px;
+			const x_px = iframe_doc.winmine.setting.x_px;
+			const iframe_width = (width*x_px)+20;
+			const iframe_height = (width*y_px)+83;
+			iframe_elem.height = iframe_height;
+			iframe_elem.width = iframe_width;
+		}, 200);
+	});
+</script>
+<body>
+<div class="col-1">
+	<iframe title="minesweeper.exe" src="" height="211px" width="148px"></iframe>
+	<a href="../">Return to fGames</a>
+</div>
+</div>
+</body>
+</html>	

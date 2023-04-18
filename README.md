@@ -12,9 +12,9 @@
     <br />
     <br />
     <a href="https://github.com/othneildrew/Best-README-Template">Email</a>
-    ·
+    ~
     <a href="https://github.com/logandoescode/logandoescode.github.io/issues">Report Bug</a>
-    ·
+    ~
     <a href="https://github.com/logandoescode/logandoescode.github.io/issues">Request Feature</a>
   </p>
 </div>

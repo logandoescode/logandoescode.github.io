@@ -11,7 +11,7 @@
     <a href="https://logandoescode.github.io/"><strong>Take me there »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">Email</a>
+    <a href="mailto:logandoescode@protonmail.ch">Email</a>
     ~
     <a href="https://github.com/logandoescode/logandoescode.github.io/issues">Report Bug</a>
     ~

@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fmedia.idownloadblog.com%2Fwp-content%2Fuploads%2F2016%2F02%2Fterminal-app-icon-OS-X.png&f=1&nofb=1&ipt=8dc6adb3168dc99a4e2c15bcda54a42ff51bd3fb926801b60c5c6e476c8e356e&ipo=images" alt="Logo" width="80" height="80">
+    <img src="https://win98icons.alexmeub.com/icons/png/world_network_directories-3.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">The LoganDoesCode Website</h3>

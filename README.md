@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://logandoescode.github.io/">
     <img src="https://win98icons.alexmeub.com/icons/png/world_network_directories-3.png" alt="Logo" width="80" height="80">
   </a>
 

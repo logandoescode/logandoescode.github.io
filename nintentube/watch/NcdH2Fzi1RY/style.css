@@ -1,0 +1,89 @@
+body{
+	margin:0px;
+}
+.header{
+	margin:15px;
+}
+.tool{
+	display:flex;
+	justify-content:space-between;
+	align-items:center;
+	margin-bottom:px;
+}
+.left,.mid,.right{
+	display:flex;
+	align-items:center;
+}
+.icon{
+	padding:8px;
+}
+input{
+	padding-left:7px;
+}
+.content{
+	display:flex;
+	margin:15px;
+}
+.videoContainer{
+	display:flex;
+	flex-direction:column;
+}
+.videoFrame{
+	margin-right:20px;
+	margin-bottom:20px;
+}
+.MakerBlock div{
+	padding-bottom:10px;
+}
+.title{
+	font-size:20px;
+}
+.videoStatus{
+	display:flex;
+	justify-content:space-between;
+	align-items:center;
+	border-bottom:1px solid #e0e0e0;
+	margin-bottom:20px;
+}
+.Statusright{
+	display:flex;
+	align-items:center;
+}
+.maker{
+	display:flex;
+	flex-direction:column;
+}
+.avatar{
+	display:flex;
+	flex-direction:row;
+	
+}
+.videolist{
+	display:flex;
+	flex-direction:column;
+	padding-top:12px;
+	background-color:red;
+	flex:1;
+}
+.videos{
+	height:100px;
+	margin:16px;
+	background-color:#000000;
+}
+.info{
+	padding-left:40px;
+}
+.xs-show{
+  display:none;
+}
+.xs-hide{
+  display:flex;
+}
+@media screen and (max-width: 900px) {
+  .xs-show {
+    display:flex;
+  }
+  .xs-hide{
+    display:none;
+  }
+}
